@@ -1,5 +1,6 @@
 import requests
 import json
+from tqdm import tqdm
 
 
 BASE_URL = "https://pokeapi.co/api/v2"
@@ -54,7 +55,8 @@ def download_pokemon_data():
         "content-type": "application/json"
     }
     with open("pokemon.txt", "w") as f:
-        for x in POKEDEX_RANGE:
+        # for x in POKEDEX_RANGE:
+        for x in tqdm(POKEDEX_RANGE, desc="Fetching Pokemon..."):
             url = f"{BASE_URL}/pokemon/{x}"
             response = requests.get(url, headers=headers)
             d = response.json()
