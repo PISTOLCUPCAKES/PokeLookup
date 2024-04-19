@@ -46,7 +46,7 @@ class Pokemon:
         poke = f"No. {self.id}\n"
         poke = poke + f"{self.name.title()}\n"
         poke = poke + f"{self.type1.name.title()}" # type 1
-        if self.type2:
+        if self.type2 and not(self.type2 == PokeType.NONE):
             poke = poke + f" | {self.type2.name.title()}" # type 2
         poke = poke + "\n" # add our new line after types
         poke = poke + "------------------------------\n"
@@ -96,8 +96,6 @@ def find_pokemon(name: str) -> Pokemon:
 
     """
     global pokedex
-    print(f"looking for: {name} typeof {type(name)}")
-    print(len(pokedex))
     
     for p in pokedex:
         # TODO - perhaps try using rapidfuzz for fuzzy searching - https://pypi.org/project/rapidfuzz/
@@ -110,7 +108,7 @@ def find_pokemon(name: str) -> Pokemon:
             type1 = PokeType[data_type1.upper()]
             
             type2 = PokeType['NONE']
-            if p['types'][1]['type']['name']:
+            if len(p['types']) > 1:
                 data_type2 = p['types'][1]['type']['name']
                 type2 = PokeType[data_type2.upper()]
             poke = Pokemon(data_id, data_name, type1, type2)
@@ -128,12 +126,12 @@ def main():
     global pokedex
     pokedex = load_pokedex()
 
+    while True:
+        print("What pokemon would you like to lookup?")
+        i = input()
 
-    print("What pokemon would you like to lookup?")
-    i = input()
-
-    pokemon = find_pokemon(i)
-    print(pokemon)
+        pokemon = find_pokemon(i)
+        print(pokemon)
 
 
 
