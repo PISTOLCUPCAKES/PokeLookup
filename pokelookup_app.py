@@ -1,6 +1,7 @@
 import os
 import customtkinter
 from PIL import Image
+from pokelookup_core import Pokemon, PokeLookup
 
 
 APP_WIDTH = 1000
@@ -53,23 +54,6 @@ class PokemonDetailsFrame(customtkinter.CTkFrame):
         self.sprite_image_label.configure(image = sprite)
 
 
-# class SearchFrame(customtkinter.CTkFrame):
-#     def __init__(self, master):
-#         super().__init__(master)
-
-#         self.grid_columnconfigure(0, weight=1)
-#         self.grid_columnconfigure(1, weight=0)
-
-#         self.entry = customtkinter.CTkEntry(self, placeholder_text="Pokemon Lookup")
-#         self.entry.grid(row=0, column=0, sticky="nesw", padx=5, pady=5)
-
-#         self.search_button =customtkinter.CTkButton(self, text="Search", command = None)
-#         self.search_button.grid(row=0, column=1, padx=5, pady=5)
-
-#     def search_button_event(self):
-#         pass
-
-
 class TypeChartFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -93,6 +77,7 @@ class App(customtkinter.CTk):
         self.pokemon_details_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
 
         self.search_bar = customtkinter.CTkEntry(self, placeholder_text="Pokemon Lookup", bg_color="transparent")
+        self.search_bar.bind("<Return>", self.search_button_event)
         self.search_bar.grid(row=0, column=1, sticky="nesw", padx=5, pady=5)
 
         self.search_button = customtkinter.CTkButton(self, text="Search", command = self.search_button_event)
@@ -102,9 +87,17 @@ class App(customtkinter.CTk):
         self.type_chart_frame.configure(fg_color="transparent")
         self.type_chart_frame.grid(row=1, column=1, columnspan=2, sticky="nesw")
 
+        self.pokelookup = PokeLookup()
 
-    def search_button_event(self):
-        print("button pressed")
+
+    def search_button_event(self, event = None):
+        search_text = self.search_bar.get()
+        print(f"Searching for: {search_text}")
+        pokemon = self.pokelookup.find_pokemon(search_text)
+        if pokemon is not None:
+            print(pokemon)
+        else:
+            print(f"Unable to find {search_text}")
 
 
 ################################################################################
