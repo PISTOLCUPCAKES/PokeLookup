@@ -53,21 +53,21 @@ class PokemonDetailsFrame(customtkinter.CTkFrame):
         self.sprite_image_label.configure(image = sprite)
 
 
-class SearchFrame(customtkinter.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
+# class SearchFrame(customtkinter.CTkFrame):
+#     def __init__(self, master):
+#         super().__init__(master)
 
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=0)
+#         self.grid_columnconfigure(0, weight=1)
+#         self.grid_columnconfigure(1, weight=0)
 
-        self.entry = customtkinter.CTkEntry(self, placeholder_text="Pokemon Lookup")
-        self.entry.grid(row=0, column=0, sticky="nesw", padx=5, pady=5)
+#         self.entry = customtkinter.CTkEntry(self, placeholder_text="Pokemon Lookup")
+#         self.entry.grid(row=0, column=0, sticky="nesw", padx=5, pady=5)
 
-        self.search_button =customtkinter.CTkButton(self, text="Search", command = None)
-        self.search_button.grid(row=0, column=1, padx=5, pady=5)
+#         self.search_button =customtkinter.CTkButton(self, text="Search", command = None)
+#         self.search_button.grid(row=0, column=1, padx=5, pady=5)
 
-    def search_button_event(self):
-        pass
+#     def search_button_event(self):
+#         pass
 
 
 class TypeChartFrame(customtkinter.CTkFrame):
@@ -82,24 +82,42 @@ class App(customtkinter.CTk):
         self.title("PokeLookup")
         self.geometry(f"{APP_WIDTH}x{APP_HEIGHT}")
 
-        # configure grid layout
+        # configure grid layout (3x2)
         self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=0)
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
 
         self.pokemon_details_frame = PokemonDetailsFrame(self)
         self.pokemon_details_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
 
-        self.search_frame = SearchFrame(self)
-        self.search_frame.grid(row=0, column=1, sticky="new")
+        self.search_bar = customtkinter.CTkEntry(self, placeholder_text="Pokemon Lookup", bg_color="transparent")
+        self.search_bar.grid(row=0, column=1, sticky="nesw", padx=5, pady=5)
+
+        self.search_button = customtkinter.CTkButton(self, text="Search", command = self.search_button_event)
+        self.search_button.grid(row=0, column=2, padx=5, pady=5)
 
         self.type_chart_frame = TypeChartFrame(self)
-        self.type_chart_frame.grid(row=1, column=1, sticky="nesw")
+        self.type_chart_frame.configure(fg_color="transparent")
+        self.type_chart_frame.grid(row=1, column=1, columnspan=2, sticky="nesw")
 
 
+    def search_button_event(self):
+        print("button pressed")
 
 
+################################################################################
+#  Function:  main                                                             #
+#  Purpose:   do all the stuff                                                 #
+################################################################################
+def main():
+    app = App()
+    app.mainloop()
 
-app = App()
-app.mainloop()
+
+################################################################################
+#  Script entry point                                                          #
+################################################################################
+if __name__ == "__main__":
+    main()
