@@ -124,7 +124,28 @@ class App(customtkinter.CTk):
             sprite_ctk = customtkinter.CTkImage(dark_image=sprite_image, light_image=sprite_image, size=POKEMON_SPRITE_SIZE)
             self.pokemon_details_frame.set_pokemon_sprite(sprite_ctk)
         else:
+            # pokemon not found, set fields to unknown
             print(f"Unable to find {search_text}")
+
+            # name
+            self.pokemon_details_frame.set_name("???")
+            
+            # types
+            type1_image = Image.open(os.path.join(TYPE_IMAGE_PATH, "unknown.png"))
+            type1_ctk = customtkinter.CTkImage(dark_image=type1_image, light_image=type1_image, size=TYPE_SPRITE_SIZE)
+
+            type2_image = Image.open(os.path.join(TYPE_IMAGE_PATH, "unknown.png"))
+            type2_ctk = customtkinter.CTkImage(dark_image=type2_image, light_image=type2_image, size=TYPE_SPRITE_SIZE)
+
+            self.pokemon_details_frame.set_types(type1_ctk, type2_ctk)
+
+            # pokemon sprite
+            sprite_image = Image.open(os.path.join(POKEMON_IMAGE_PATH, "0.png"))
+            sprite_ctk = customtkinter.CTkImage(dark_image=sprite_image, light_image=sprite_image, size=POKEMON_SPRITE_SIZE)
+            self.pokemon_details_frame.set_pokemon_sprite(sprite_ctk)
+        
+        self.search_bar.focus_set()
+        self.search_bar.select_to(len(search_text))
 
 
 ################################################################################
