@@ -160,11 +160,12 @@ class PokeLookup:
         
         for p in self.pokedex:
             # TODO - perhaps try using rapidfuzz for fuzzy searching - https://pypi.org/project/rapidfuzz/
-            if p['name'] == name or p['id'] == id:
+            if p['name'] == name.lower() or p['id'] == id:
                 # we have our element
                 data_id = p['id']
                 data_name = p['name']
 
+                # TODO - need to dig into 'past_types' to get correct gen 3 type. e.g., clefairy is 'fairy' in newer games but was 'normal' in gen 3
                 data_type1 = p['types'][0]['type']['name']
                 type1 = PokeType[data_type1.upper()]
                 
