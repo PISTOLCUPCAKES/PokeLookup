@@ -10,7 +10,6 @@ POKEDEX_RANGE = range(1, 386+1) # gen 3 is 1-386 inclusive
 pokedex = {}
 
 class PokeType(Enum):
-    NONE     = -1
     NORMAL   = 0
     FIGHTING = 1
     FLYING   = 2
@@ -87,7 +86,7 @@ class Pokemon:
         poke = f"No. {self.id}\n"
         poke = poke + f"{self.name.title()}\n"
         poke = poke + f"{self.type1.name.title()}" # type 1
-        if self.type2 and not(self.type2 == PokeType.NONE):
+        if self.type2 is not None:
             poke = poke + f" | {self.type2.name.title()}" # type 2
         poke = poke + "\n" # add our new line after types
         poke = poke + "------------------------------\n"
@@ -148,7 +147,7 @@ def find_pokemon(name: str) -> Pokemon:
             data_type1 = p['types'][0]['type']['name']
             type1 = PokeType[data_type1.upper()]
             
-            type2 = PokeType['NONE']
+            type2 = None
             if len(p['types']) > 1:
                 data_type2 = p['types'][1]['type']['name']
                 type2 = PokeType[data_type2.upper()]
@@ -164,16 +163,6 @@ def find_pokemon(name: str) -> Pokemon:
 def main():
     # download_pokemon_data()
 
-    # global pokedex
-    # pokedex = load_pokedex()
-
-    # while True:
-    #     print("What pokemon would you like to lookup?")
-    #     i = input()
-
-    #     pokemon = find_pokemon(i)
-    #     print(pokemon)
-
     print(TYPE_CHART[PokeType.NORMAL.value])
     print(f"Ghost attacking Normal. Expecting 0: {TYPE_CHART[PokeType.GHOST.value][PokeType.NORMAL.value]}")
     print(f"Normal attacking Ghost. Expecting 0: {TYPE_CHART[PokeType.NORMAL.value][PokeType.GHOST.value]}")
@@ -181,6 +170,19 @@ def main():
     print(f"Dark attacking Ghost. Expecting 2: {TYPE_CHART[PokeType.DARK.value][PokeType.GHOST.value]}")
     print(f"Dark attacking Dark. Expecting 0.5: {TYPE_CHART[PokeType.DARK.value][PokeType.DARK.value]}")
     print(f"Ice attacking Steel. Expecting 0.5: {TYPE_CHART[PokeType.ICE.value][PokeType.STEEL.value]}")
+
+
+    global pokedex
+    pokedex = load_pokedex()
+
+    while True:
+        print("What pokemon would you like to lookup?")
+        i = input()
+
+        pokemon = find_pokemon(i)
+        print(pokemon)
+
+
     # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
     # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
     # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
