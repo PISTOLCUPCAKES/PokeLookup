@@ -10,25 +10,66 @@ POKEDEX_RANGE = range(1, 386+1) # gen 3 is 1-386 inclusive
 pokedex = {}
 
 class PokeType(Enum):
-    NONE = 0
-    NORMAL = 1
-    FIGHTING = 2
-    FLYING = 3
-    POISON = 4
-    GROUND = 5
-    ROCK = 6
-    BUG = 7
-    GHOST = 8
-    STEEL = 9
-    FIRE = 10
-    WATER = 11
-    GRASS = 12
-    ELECTRIC = 13
-    PSYCHIC = 14
-    ICE = 15
-    DRAGON = 16
-    DARK = 17
-    UNKNOWN = 10001
+    NONE     = -1
+    NORMAL   = 0
+    FIGHTING = 1
+    FLYING   = 2
+    POISON   = 3
+    GROUND   = 4
+    ROCK     = 5
+    BUG      = 6
+    GHOST    = 7
+    STEEL    = 8
+    FIRE     = 9
+    WATER    = 10
+    GRASS    = 11
+    ELECTRIC = 12
+    PSYCHIC  = 13
+    ICE      = 14
+    DRAGON   = 15
+    DARK     = 16
+    UNKNOWN  = 10001
+
+
+TYPE_CHART = [
+    # Attack type in rows, Defender type in columns
+    #                                                           Defending Type
+    # Normal    Fighting    Flying  Poison  Ground  Rock    Bug     Ghost   Steel   Fire    Water   Grass   Electric    Psychic Ice     Dragon  Dark
+    # Normal
+    [ 1,        1,          1,      1,      1,      0.5,    1,      0,      0.5,    1,      1,      1,      1,          1,      1,      1,      1   ],
+    # Fighting
+    [ 2,        1,          0.5,    0.5,    1,      2,      0.5,    0,      2,      1,      1,      1,      1,          0.5,    2,      1,      2   ],
+    # Flying
+    [ 1,        2,          1,      1,      1,      0.5,    2,      1,      0.5,    1,      1,      2,      0.5,        1,      1,      1,      1   ],
+    # Poison
+    [ 1,        1,          1,      0.5,    0.5,    0.5,    1,      0.5,    0,      1,      1,      2,      1,          1,      1,      1,      1   ],
+    # Ground
+    [ 1,        1,          0,      2,      1,      2,      0.5,    1,      2,      2,      1,      0.5,    2,          1,      1,      1,      1   ],
+    # Rock
+    [ 1,        0.5,        2,      1,      0.5,    1,      2,      1,      0.5,    2,      1,      1,      1,          1,      2,      1,      1   ],
+    # Bug
+    [ 1,        0.5,        0.5,    0.5,    1,      1,      1,      0.5,    0.5,    0.5,    1,      2,      1,          2,      1,      1,      2   ],
+    # Ghost
+    [ 0,        1,          1,      1,      1,      1,      1,      2,      0.5,    1,      1,      1,      1,          2,      1,      1,      0.5 ],
+    # Steel
+    [ 1,        1,          1,      1,      1,      2,      1,      1,      0.5,    0.5,    0.5,    1,      0.5,        1,      2,      1,      1   ],
+    # Fire
+    [ 1,        1,          1,      1,      1,      0.5,    2,      1,      2,      0.5,    0.5,    2,      1,          1,      2,      0.5,    1   ],
+    # Water
+    [ 1,        1,          1,      1,      2,      2,      1,      1,      1,      2,      0.5,    0.5,    1,          1,      1,      0.5,    1   ],
+    # Grass
+    [ 1,        1,          0.5,    0.5,    2,      2,      0.5,    1,      0.5,    0.5,    2,      0.5,    1,          1,      1,      0.5,    1   ],
+    # Electric
+    [ 1,        1,          2,      1,      0,      1,      1,      1,      1,      1,      2,      0.5,    0.5,        1,      1,      0.5,    1   ],
+    # Psychic
+    [ 1,        2,          1,      2,      1,      1,      1,      1,      0.5,    1,      1,      1,      1,          0.5,    1,      1,      0   ],
+    # Ice
+    [ 1,        1,          2,      1,      2,      1,      1,      1,      0.5,    0.5,    0.5,    2,      1,          1,      0.5,    2,      1   ],
+    # Dragon
+    [ 1,        1,          1,      1,      1,      1,      1,      1,      0.5,    1,      1,      1,      1,          1,      1,      2,      1   ],
+    # Dark
+    [ 1,        0.5,        1,      1,      1,      1,      1,      2,      0.5,    1,      1,      1,      1,          2,      1,      1,      0.5 ]
+]
 
 
 class Pokemon:
@@ -123,15 +164,32 @@ def find_pokemon(name: str) -> Pokemon:
 def main():
     # download_pokemon_data()
 
-    global pokedex
-    pokedex = load_pokedex()
+    # global pokedex
+    # pokedex = load_pokedex()
 
-    while True:
-        print("What pokemon would you like to lookup?")
-        i = input()
+    # while True:
+    #     print("What pokemon would you like to lookup?")
+    #     i = input()
 
-        pokemon = find_pokemon(i)
-        print(pokemon)
+    #     pokemon = find_pokemon(i)
+    #     print(pokemon)
+
+    print(TYPE_CHART[PokeType.NORMAL.value])
+    print(f"Ghost attacking Normal. Expecting 0: {TYPE_CHART[PokeType.GHOST.value][PokeType.NORMAL.value]}")
+    print(f"Normal attacking Ghost. Expecting 0: {TYPE_CHART[PokeType.NORMAL.value][PokeType.GHOST.value]}")
+    print(f"Fighting attacking Normal. Expecting 2: {TYPE_CHART[PokeType.FIGHTING.value][PokeType.NORMAL.value]}")
+    print(f"Dark attacking Ghost. Expecting 2: {TYPE_CHART[PokeType.DARK.value][PokeType.GHOST.value]}")
+    print(f"Dark attacking Dark. Expecting 0.5: {TYPE_CHART[PokeType.DARK.value][PokeType.DARK.value]}")
+    print(f"Ice attacking Steel. Expecting 0.5: {TYPE_CHART[PokeType.ICE.value][PokeType.STEEL.value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
+    # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
 
 
 
