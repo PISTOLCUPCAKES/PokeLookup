@@ -78,6 +78,26 @@ class Pokemon:
         self.type1 = type1
         self.type2 = type2
 
+
+    def get_type_effectiveness(self, attack_type: PokeType) -> float:
+        """
+        Calculates and returns an attacks effectiveness against this Pokemon
+    
+        Parameters:
+            attack_type (type): description
+    
+        Returns:
+            float: The effectiveness (or damage multiplier) of specified attack type vs this Pokemon
+    
+        """
+        type1_effectiveness = TYPE_CHART[attack_type.value][self.type1.value]
+        type2_effectiveness = 1 if self.type2 is None else TYPE_CHART[attack_type.value][self.type2.value]
+        print(f"type1: {attack_type.name} vs {self.type1.name}: {type1_effectiveness}")
+        print(f"type2: {attack_type.name} vs {'NONE' if self.type2 is None else self.type2.name}: {type2_effectiveness}")
+        print(f"overall: {type1_effectiveness * type2_effectiveness}")
+        return type1_effectiveness * type2_effectiveness
+
+
     def __str__(self):
         # No. 1
         # Bulbasaur
@@ -180,7 +200,27 @@ def main():
         i = input()
 
         pokemon = find_pokemon(i)
+        if pokemon is None:
+            print(f"Pokemon '{i}' not found. Sorry!")
+            continue
         print(pokemon)
+        pokemon.get_type_effectiveness(PokeType.NORMAL)
+        pokemon.get_type_effectiveness(PokeType.FIGHTING)
+        pokemon.get_type_effectiveness(PokeType.FLYING)
+        pokemon.get_type_effectiveness(PokeType.POISON)
+        pokemon.get_type_effectiveness(PokeType.GROUND)
+        pokemon.get_type_effectiveness(PokeType.ROCK)
+        pokemon.get_type_effectiveness(PokeType.BUG)
+        pokemon.get_type_effectiveness(PokeType.GHOST)
+        pokemon.get_type_effectiveness(PokeType.STEEL)
+        pokemon.get_type_effectiveness(PokeType.FIRE)
+        pokemon.get_type_effectiveness(PokeType.WATER)
+        pokemon.get_type_effectiveness(PokeType.GRASS)
+        pokemon.get_type_effectiveness(PokeType.ELECTRIC)
+        pokemon.get_type_effectiveness(PokeType.PSYCHIC)
+        pokemon.get_type_effectiveness(PokeType.ICE)
+        pokemon.get_type_effectiveness(PokeType.DRAGON)
+        pokemon.get_type_effectiveness(PokeType.DARK)
 
 
     # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
