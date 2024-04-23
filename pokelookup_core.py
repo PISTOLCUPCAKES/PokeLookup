@@ -144,7 +144,7 @@ class PokeLookup:
 
 
 
-    def find_pokemon(self, name: str) -> Pokemon:
+    def find_pokemon(self, search_name) -> Pokemon:
     # def find_pokemon(name) -> Pokemon:
         """
         Search pokedex for a pokemon by name and return it if found
@@ -160,20 +160,28 @@ class PokeLookup:
         
         for p in self.pokedex:
             # TODO - perhaps try using rapidfuzz for fuzzy searching - https://pypi.org/project/rapidfuzz/
-            if p['name'] == name.lower() or p['id'] == id:
+            if p['name'] == search_name.lower() or str(p['id']) == search_name:
                 # we have our element
-                data_id = p['id']
-                data_name = p['name']
+                id = p['id']
+                name = p['name']
+                current_type1 = p['types'][0]['type']['name']
+                current_type2 = p['types'][1]['type']['name'] if len(p['types']) > 1 else None
 
-                # TODO - need to dig into 'past_types' to get correct gen 3 type. e.g., clefairy is 'fairy' in newer games but was 'normal' in gen 3
-                data_type1 = p['types'][0]['type']['name']
-                type1 = PokeType[data_type1.upper()]
-                
-                type2 = None
-                if len(p['types']) > 1:
-                    data_type2 = p['types'][1]['type']['name']
-                    type2 = PokeType[data_type2.upper()]
-                poke = Pokemon(data_id, data_name, type1, type2)
+                type1 = current_type1
+                type2 = current_type2
+
+                for t in p['past_types']:
+                    # e.g., "generation-v" means the pokemon was <past_types> in generation 5 and earlier
+                    # e.g., clefairy was normal through gen 5 and became fairy in gen 6
+                    # we only intend to support gen 3 pokemon and type changes were only made after gen 1 and after gen 5
+                    # So use gen 5 past_types if they exist, otherwise use types
+                    if t['generation']['name'] == "generation-v":
+                        type1 = t['types'][0]['type']['name']
+                        type2 = t['types'][1]['type']['name'] if len(t['types']) > 1 else None
+
+                poketype1 = PokeType[type1.upper()]
+                poketype2 = PokeType[type2.upper()] if type2 is not None else None
+                poke = Pokemon(id, name, poketype1, poketype2)
                 return poke
         return None
 
@@ -204,23 +212,23 @@ def main():
             print(f"Pokemon '{i}' not found. Sorry!")
             continue
         print(pokemon)
-        pokemon.get_type_effectiveness(PokeType.NORMAL)
-        pokemon.get_type_effectiveness(PokeType.FIGHTING)
-        pokemon.get_type_effectiveness(PokeType.FLYING)
-        pokemon.get_type_effectiveness(PokeType.POISON)
-        pokemon.get_type_effectiveness(PokeType.GROUND)
-        pokemon.get_type_effectiveness(PokeType.ROCK)
-        pokemon.get_type_effectiveness(PokeType.BUG)
-        pokemon.get_type_effectiveness(PokeType.GHOST)
-        pokemon.get_type_effectiveness(PokeType.STEEL)
-        pokemon.get_type_effectiveness(PokeType.FIRE)
-        pokemon.get_type_effectiveness(PokeType.WATER)
-        pokemon.get_type_effectiveness(PokeType.GRASS)
-        pokemon.get_type_effectiveness(PokeType.ELECTRIC)
-        pokemon.get_type_effectiveness(PokeType.PSYCHIC)
-        pokemon.get_type_effectiveness(PokeType.ICE)
-        pokemon.get_type_effectiveness(PokeType.DRAGON)
-        pokemon.get_type_effectiveness(PokeType.DARK)
+        # pokemon.get_type_effectiveness(PokeType.NORMAL)
+        # pokemon.get_type_effectiveness(PokeType.FIGHTING)
+        # pokemon.get_type_effectiveness(PokeType.FLYING)
+        # pokemon.get_type_effectiveness(PokeType.POISON)
+        # pokemon.get_type_effectiveness(PokeType.GROUND)
+        # pokemon.get_type_effectiveness(PokeType.ROCK)
+        # pokemon.get_type_effectiveness(PokeType.BUG)
+        # pokemon.get_type_effectiveness(PokeType.GHOST)
+        # pokemon.get_type_effectiveness(PokeType.STEEL)
+        # pokemon.get_type_effectiveness(PokeType.FIRE)
+        # pokemon.get_type_effectiveness(PokeType.WATER)
+        # pokemon.get_type_effectiveness(PokeType.GRASS)
+        # pokemon.get_type_effectiveness(PokeType.ELECTRIC)
+        # pokemon.get_type_effectiveness(PokeType.PSYCHIC)
+        # pokemon.get_type_effectiveness(PokeType.ICE)
+        # pokemon.get_type_effectiveness(PokeType.DRAGON)
+        # pokemon.get_type_effectiveness(PokeType.DARK)
 
 
     # print(f": {TYPE_EFFECTIVENESS[PokeType..value][PokeType..value]}")
