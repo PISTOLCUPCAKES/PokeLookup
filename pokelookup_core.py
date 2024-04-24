@@ -4,10 +4,12 @@ from tqdm import tqdm
 from enum import Enum
 from timeit import default_timer as timer
 from typing import List
+from rapidfuzz import fuzz, utils
 
 
 BASE_URL = "https://pokeapi.co/api/v2"
 POKEDEX_RANGE = range(1, 386+1) # gen 3 is 1-386 inclusive
+
 
 class PokeType(Enum):
     NORMAL   = 0
@@ -156,7 +158,6 @@ class PokeLookup:
 
 
     def find_pokemon(self, search_name) -> Pokemon:
-    # def find_pokemon(name) -> Pokemon:
         """
         Search pokedex for a pokemon by name and return it if found
 
@@ -168,33 +169,56 @@ class PokeLookup:
             Pokemon: instance of Pokemon with pokemon's details
 
         """
+        match = None
+        fuzz_idx = None
+        fuzz_ratio = 0
         
-        for p in self.pokedex:
-            # TODO - perhaps try using rapidfuzz for fuzzy searching - https://pypi.org/project/rapidfuzz/
+        for i, p in enumerate(self.pokedex):
+
+            # check for an exact match. If we get one then we can break the loop
             if p['name'] == search_name.lower() or str(p['id']) == search_name:
-                # we have our element
-                id = p['id']
-                name = p['name']
-                current_type1 = p['types'][0]['type']['name']
-                current_type2 = p['types'][1]['type']['name'] if len(p['types']) > 1 else None
+                match = i
+                break
+            
+            # check for fuzzy matches, we'll keep track of the best match and then use that if we don't end up getting an exact match
+            temp_ratio = fuzz.ratio(search_name, p['name'], processor=utils.default_process)
+            if temp_ratio > fuzz_ratio:
+                fuzz_idx = i
+                fuzz_ratio = temp_ratio
 
-                type1 = current_type1
-                type2 = current_type2
+        if match is None:
+            print(f"Using fuzzy match: {fuzz_idx}")
+            match = fuzz_idx
+        else:
+            print(f"Using exact match: {match}")
 
-                for t in p['past_types']:
-                    # e.g., "generation-v" means the pokemon was <past_types> in generation 5 and earlier
-                    # e.g., clefairy was normal through gen 5 and became fairy in gen 6
-                    # we only intend to support gen 3 pokemon and type changes were only made after gen 1 and after gen 5
-                    # So use gen 5 past_types if they exist, otherwise use types
-                    if t['generation']['name'] == "generation-v":
-                        type1 = t['types'][0]['type']['name']
-                        type2 = t['types'][1]['type']['name'] if len(t['types']) > 1 else None
+        # this shouldn't ever happen since we're just using best fuzzy match when theres no exact match, but just in case
+        if match is None:
+            return None
+        
+        p = self.pokedex[match]
 
-                poketype1 = PokeType[type1.upper()]
-                poketype2 = PokeType[type2.upper()] if type2 is not None else None
-                poke = Pokemon(id, name, poketype1, poketype2)
-                return poke
-        return None
+        id = p['id']
+        name = p['name']
+        current_type1 = p['types'][0]['type']['name']
+        current_type2 = p['types'][1]['type']['name'] if len(p['types']) > 1 else None
+
+        type1 = current_type1
+        type2 = current_type2
+
+        for t in p['past_types']:
+            # e.g., "generation-v" means the pokemon was <past_types> in generation 5 and earlier
+            # e.g., clefairy was normal through gen 5 and became fairy in gen 6
+            # we only intend to support gen 3 pokemon and type changes were only made after gen 1 and after gen 5
+            # So use gen 5 past_types if they exist, otherwise use types
+            if t['generation']['name'] == "generation-v":
+                type1 = t['types'][0]['type']['name']
+                type2 = t['types'][1]['type']['name'] if len(t['types']) > 1 else None
+
+        poketype1 = PokeType[type1.upper()]
+        poketype2 = PokeType[type2.upper()] if type2 is not None else None
+        poke = Pokemon(id, name, poketype1, poketype2)
+        return poke
 
 
 ################################################################################
@@ -223,7 +247,7 @@ def main():
             print(f"Pokemon '{i}' not found. Sorry!")
             continue
         print(pokemon)
-        print(pokemon.get_type_chart())
+        # print(pokemon.get_type_chart())
         # pokemon.get_type_effectiveness(PokeType.NORMAL)
         # pokemon.get_type_effectiveness(PokeType.FIGHTING)
         # pokemon.get_type_effectiveness(PokeType.FLYING)
