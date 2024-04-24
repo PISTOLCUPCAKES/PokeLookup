@@ -1,7 +1,9 @@
 import os
+import math
 import customtkinter
 from PIL import Image
 from pokelookup_core import Pokemon, PokeLookup
+from typing import List
 
 
 APP_WIDTH = 1000
@@ -46,7 +48,9 @@ class PokemonDetailsFrame(customtkinter.CTkFrame):
         self.sprite_image_label = customtkinter.CTkLabel(self, image=self.sprite_image, text="")
         self.sprite_image_label.grid(row=2, column=0, columnspan=2, padx=5)
     
-
+    def set_font(self, f: customtkinter.CTkFont):
+        self.name_label.configure(font = f)
+    
     def set_name(self, name: str):
         self.name_label.configure(text=name)
 
@@ -61,6 +65,87 @@ class PokemonDetailsFrame(customtkinter.CTkFrame):
 class TypeChartFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+
+        self.grid_columnconfigure([0,1,2,3], weight=1)
+
+        self.type_chart_label = customtkinter.CTkLabel(self, text="Type Effectiveness")
+        self.type_chart_label.grid(row=0, column=0, columnspan=4, padx=5, pady=(0,20), sticky="nesw")
+
+        self.type_eff_images = []
+        self.type_eff_labels = []
+
+        num_images = 17
+        half_images = math.floor(num_images / 2)
+        row = 0
+        col = 0
+        for i in range(0, num_images):
+            # math to calculate rows/columns. Goal here is 4 columns and as many rows as needed. e.g.:
+            # <half of images>  <half of labels>    <other half of images>  <other half of labels>
+            row = i + 1 if i <= half_images else i - half_images
+            col = 0 if i <= half_images else 2
+
+            image = Image.open(os.path.join(TYPE_IMAGE_PATH, f"{i}.png"))
+            image_ctk = customtkinter.CTkImage(dark_image=image, light_image=image, size=TYPE_SPRITE_SIZE)
+            image_lbl = customtkinter.CTkLabel(master=self, image=image_ctk, text="")
+            image_lbl.grid(row=row, column=col, pady=5, sticky="nesw")
+            self.type_eff_images.append(image_lbl)
+
+            label = customtkinter.CTkLabel(self, text="?")
+            label.grid(row=row, column=col+1, pady=5, sticky="nesw")
+            self.type_eff_labels.append(label)
+    
+
+    def get_multiplier_fg_color(self, multiplier: float) -> str:
+        default = "transparent"
+        color = default
+        if multiplier < 1:
+            color = "#ffc7ce" # light red
+        elif multiplier == 1:
+            color = default
+        elif multiplier > 1:
+            color = "#c6efce" # light green
+        else:
+            color = default
+        return color
+    
+    def get_multiplier_text_color(self, multiplier: float) -> str:
+        default = "#dce4ee"
+        color = default # gray10 is the default for dark theme
+        if multiplier < 1:
+            color = "#9c0006" # dark red
+        elif multiplier == 1:
+            color = default
+        elif multiplier > 1:
+            color = "#006126" # dark green
+        else:
+            color = default
+        return color
+    
+    def convert_multiplier_to_text(self, multiplier: float) -> str:
+        val = f"{multiplier}"
+        if multiplier == 0.5:
+            val = "1/2"
+        elif multiplier == 0.25:
+            val = "1/4"
+        return val
+
+    def set_type_chart(self, type_chart: List[float]):
+        for i in range(0, len(type_chart)):
+            self.type_eff_labels[i].configure(text = self.convert_multiplier_to_text(type_chart[i]))
+            self.type_eff_labels[i].configure(fg_color = self.get_multiplier_fg_color(type_chart[i]))
+            self.type_eff_labels[i].configure(text_color = self.get_multiplier_text_color(type_chart[i]))
+
+    def reset_type_chart(self):
+        for lbl in self.type_eff_labels:
+            lbl.configure(text = "?")
+            lbl.configure(fg_color = "transparent")
+            lbl.configure(text_color = "#dce4ee")
+
+    def set_font(self, f: customtkinter.CTkFont):
+        self.type_chart_label.configure(font = f)
+        for lbl in self.type_eff_labels:
+            lbl.configure(font = f)
+
 
 
 class App(customtkinter.CTk):
@@ -80,19 +165,20 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure(1, weight=1)
 
         self.pokemon_details_frame = PokemonDetailsFrame(self)
-        self.pokemon_details_frame.name_label.configure(font=self.APP_FONT)
+        self.pokemon_details_frame.set_font(self.APP_FONT)
         self.pokemon_details_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
 
         self.search_bar = customtkinter.CTkEntry(self, placeholder_text="Pokemon Lookup", bg_color="transparent")
         self.search_bar.bind("<Return>", self.search_button_event)
-        self.search_bar.grid(row=0, column=1, sticky="nesw", padx=5, pady=5)
+        self.search_bar.grid(row=0, column=1, sticky="nesw", padx=5, pady=(5, 25))
 
         self.search_button = customtkinter.CTkButton(self, text="Search", command = self.search_button_event)
-        self.search_button.grid(row=0, column=2, padx=5, pady=5)
+        self.search_button.grid(row=0, column=2, padx=5, pady=(5,25))
 
         self.type_chart_frame = TypeChartFrame(self)
         self.type_chart_frame.configure(fg_color="transparent")
         self.type_chart_frame.grid(row=1, column=1, columnspan=2, sticky="nesw")
+        self.type_chart_frame.set_font(self.APP_FONT)
 
         self.pokelookup = PokeLookup()
 
@@ -123,6 +209,9 @@ class App(customtkinter.CTk):
             sprite_image = Image.open(os.path.join(POKEMON_IMAGE_PATH, f"{pokemon.id}.png"))
             sprite_ctk = customtkinter.CTkImage(dark_image=sprite_image, light_image=sprite_image, size=POKEMON_SPRITE_SIZE)
             self.pokemon_details_frame.set_pokemon_sprite(sprite_ctk)
+
+            # type chart
+            self.type_chart_frame.set_type_chart(pokemon.get_type_chart())
         else:
             # pokemon not found, set fields to unknown
             print(f"Unable to find {search_text}")
@@ -143,6 +232,8 @@ class App(customtkinter.CTk):
             sprite_image = Image.open(os.path.join(POKEMON_IMAGE_PATH, "0.png"))
             sprite_ctk = customtkinter.CTkImage(dark_image=sprite_image, light_image=sprite_image, size=POKEMON_SPRITE_SIZE)
             self.pokemon_details_frame.set_pokemon_sprite(sprite_ctk)
+
+            self.type_chart_frame.reset_type_chart()
         
         self.search_bar.focus_set()
         self.search_bar.select_to(len(search_text))
