@@ -3,6 +3,7 @@ import json
 from tqdm import tqdm
 from enum import Enum
 from timeit import default_timer as timer
+from typing import List
 
 
 BASE_URL = "https://pokeapi.co/api/v2"
@@ -26,7 +27,7 @@ class PokeType(Enum):
     ICE      = 14
     DRAGON   = 15
     DARK     = 16
-    UNKNOWN  = 10001
+    # UNKNOWN  = 10001
 
 
 TYPE_CHART = [
@@ -83,7 +84,7 @@ class Pokemon:
         Calculates and returns an attacks effectiveness against this Pokemon
     
         Parameters:
-            attack_type (type): description
+            attack_type (PokeType): The type of the attack
     
         Returns:
             float: The effectiveness (or damage multiplier) of specified attack type vs this Pokemon
@@ -91,10 +92,20 @@ class Pokemon:
         """
         type1_effectiveness = TYPE_CHART[attack_type.value][self.type1.value]
         type2_effectiveness = 1 if self.type2 is None else TYPE_CHART[attack_type.value][self.type2.value]
-        print(f"type1: {attack_type.name} vs {self.type1.name}: {type1_effectiveness}")
-        print(f"type2: {attack_type.name} vs {'NONE' if self.type2 is None else self.type2.name}: {type2_effectiveness}")
-        print(f"overall: {type1_effectiveness * type2_effectiveness}")
-        return type1_effectiveness * type2_effectiveness
+        overall_effectiveness = type1_effectiveness * type2_effectiveness
+        return round(overall_effectiveness) if overall_effectiveness == round(overall_effectiveness) else overall_effectiveness # this seems silly but it will convert '1.0' to '1'
+
+    def get_type_chart(self) -> List[float]:
+        """
+        returns type effectiveness for each type against this pokemon
+    
+        Returns:
+            List[float]: List of type effectiveness against this pokemon in PokeType order. e.g., for Fighting you can get the multiplier by list[PokeType.FIGHTING.value]
+        """
+        type_chart = []
+        for t in PokeType:
+            type_chart.insert(t.value, self.get_type_effectiveness(t))
+        return type_chart
 
 
     def __str__(self):
@@ -110,6 +121,7 @@ class Pokemon:
         poke = poke + "\n" # add our new line after types
         poke = poke + "------------------------------\n"
         return poke
+
 
 class PokeLookup:
     def __init__(self):
@@ -212,6 +224,7 @@ def main():
             print(f"Pokemon '{i}' not found. Sorry!")
             continue
         print(pokemon)
+        print(pokemon.get_type_chart())
         # pokemon.get_type_effectiveness(PokeType.NORMAL)
         # pokemon.get_type_effectiveness(PokeType.FIGHTING)
         # pokemon.get_type_effectiveness(PokeType.FLYING)
