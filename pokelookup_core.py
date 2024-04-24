@@ -27,7 +27,6 @@ class PokeType(Enum):
     ICE      = 14
     DRAGON   = 15
     DARK     = 16
-    # UNKNOWN  = 10001
 
 
 TYPE_CHART = [
