@@ -193,7 +193,8 @@ class App(customtkinter.CTk):
             print(pokemon)
 
             # name
-            self.pokemon_details_frame.set_name(pokemon.name.title())
+            name_str = f"#{pokemon.id:03} - {pokemon.name.title()}"
+            self.pokemon_details_frame.set_name(name_str)
             
             # types
             type1_image = Image.open(os.path.join(TYPE_IMAGE_PATH, f"{pokemon.type1.value}.png"))
